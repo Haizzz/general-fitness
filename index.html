@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>General Fitness Workout</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 15px;
+      padding-bottom: 90px;
+      overflow-y: auto;
+    }
+    
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+      color: #00d9ff;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 15px;
+    }
+    
+    .round-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    
+    .round-title {
+      color: #ff6b6b;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    
+    .exercise-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .exercise-item.active {
+      background: rgba(0, 217, 255, 0.2);
+      border-radius: 6px;
+      padding: 6px 8px;
+      margin: 2px -8px;
+    }
+    
+    .exercise-item.done {
+      opacity: 0.4;
+      text-decoration: line-through;
+    }
+    
+    .exercise-name { font-weight: 500; }
+    .exercise-reps { color: #00d9ff; }
+    
+    .timer-display {
+      text-align: center;
+      padding: 20px 15px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      display: none;
+      flex: 1;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      margin-top: 10px;
+    }
+    
+    .timer-display.show { display: flex; }
+    
+    .current-exercise {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+      color: #00d9ff;
+    }
+    
+    .current-reps {
+      font-size: 1.1rem;
+      color: #888;
+      margin-bottom: 15px;
+    }
+    
+    .timer {
+      font-size: 5rem;
+      font-weight: bold;
+      color: #fff;
+    }
+    
+    .timer.rest { color: #ff6b6b; }
+    
+    .status {
+      margin-top: 12px;
+      font-size: 0.9rem;
+      color: #888;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 18px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    
+    .btn:hover { transform: scale(1.02); }
+    .btn:active { transform: scale(0.98); }
+    
+    .btn-start {
+      background: linear-gradient(135deg, #00d9ff, #0099cc);
+      color: #000;
+    }
+    
+    .btn-done {
+      background: linear-gradient(135deg, #4ade80, #22c55e);
+      color: #000;
+    }
+    
+    .btn-skip {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      margin-top: 10px;
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .button-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 20px 15px;
+      padding-top: 25px;
+      background: #1a1a2e;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .button-container::before {
+      content: '';
+      position: absolute;
+      top: -30px;
+      left: 0;
+      right: 0;
+      height: 30px;
+      background: linear-gradient(to top, #1a1a2e, transparent);
+      pointer-events: none;
+    }
+    
+    .progress-bar {
+      height: 10px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00d9ff, #4ade80);
+      transition: width 0.3s;
+    }
+    
+    .confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    
+    .complete-screen {
+      text-align: center;
+      padding: 60px 20px;
+      display: none;
+    }
+    
+    .complete-screen.show { display: block; }
+    
+    .complete-screen h2 {
+      font-size: 2.5rem;
+      color: #4ade80;
+      margin-bottom: 20px;
+    }
+    
+    .complete-screen p {
+      font-size: 1.2rem;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💪 General Fitness</h1>
+    <p class="subtitle">~10 minutes • 2 rounds • 5 exercises each</p>
+    
+    <div class="timer-display" id="timerDisplay">
+      <div class="current-exercise" id="currentExercise">Jumping Jacks</div>
+      <div class="current-reps" id="currentReps">30 reps</div>
+      <div class="timer" id="timer">GO!</div>
+      <div class="status" id="status">Round 1 of 2</div>
+    </div>
+    
+    <div id="exerciseList">
+      <div class="round-card">
+        <div class="round-title">Round 1</div>
+        <div class="exercise-item" data-round="1" data-index="0">
+          <span class="exercise-name">Jumping Jacks</span>
+          <span class="exercise-reps">30 reps</span>
+        </div>
+        <div class="exercise-item" data-round="1" data-index="1">
+          <span class="exercise-name">Arm Circles</span>
+          <span class="exercise-reps">40 reps</span>
+        </div>
+        <div class="exercise-item" data-round="1" data-index="2">
+          <span class="exercise-name">Squats</span>
+          <span class="exercise-reps">20 reps</span>
+        </div>
+        <div class="exercise-item" data-round="1" data-index="3">
+          <span class="exercise-name">High Knees</span>
+          <span class="exercise-reps">60 reps</span>
+        </div>
+        <div class="exercise-item" data-round="1" data-index="4">
+          <span class="exercise-name">Bicycle Crunches</span>
+          <span class="exercise-reps">40 reps</span>
+        </div>
+      </div>
+      
+      <div class="round-card">
+        <div class="round-title">Round 2</div>
+        <div class="exercise-item" data-round="2" data-index="0">
+          <span class="exercise-name">Jumping Jacks</span>
+          <span class="exercise-reps">30 reps</span>
+        </div>
+        <div class="exercise-item" data-round="2" data-index="1">
+          <span class="exercise-name">Arm Circles</span>
+          <span class="exercise-reps">40 reps</span>
+        </div>
+        <div class="exercise-item" data-round="2" data-index="2">
+          <span class="exercise-name">Squats</span>
+          <span class="exercise-reps">20 reps</span>
+        </div>
+        <div class="exercise-item" data-round="2" data-index="3">
+          <span class="exercise-name">High Knees</span>
+          <span class="exercise-reps">60 reps</span>
+        </div>
+        <div class="exercise-item" data-round="2" data-index="4">
+          <span class="exercise-name">Bicycle Crunches</span>
+          <span class="exercise-reps">40 reps</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="complete-screen" id="completeScreen">
+      <h2>🎉 Workout Complete!</h2>
+      <p>Great job! You crushed it!</p>
+    </div>
+    
+    </div>
+  
+  <div class="button-container">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress" style="width: 0%"></div>
+    </div>
+    <button class="btn btn-start" id="startBtn">Start Workout</button>
+    <button class="btn btn-done" id="doneBtn" style="display:none">Done - Next Exercise</button>
+    <button class="btn btn-skip" id="skipBtn" style="display:none">Skip Rest</button>
+  </div>
+  
+  <canvas class="confetti" id="confetti"></canvas>
+  
+  <script>
+    const exercises = [
+      { name: 'Jumping Jacks', reps: '30 reps', round: 1 },
+      { name: 'Arm Circles', reps: '40 reps', round: 1 },
+      { name: 'Squats', reps: '20 reps', round: 1 },
+      { name: 'High Knees', reps: '60 reps', round: 1 },
+      { name: 'Bicycle Crunches', reps: '40 reps', round: 1 },
+      { name: 'Jumping Jacks', reps: '30 reps', round: 2 },
+      { name: 'Arm Circles', reps: '40 reps', round: 2 },
+      { name: 'Squats', reps: '20 reps', round: 2 },
+      { name: 'High Knees', reps: '60 reps', round: 2 },
+      { name: 'Bicycle Crunches', reps: '40 reps', round: 2 },
+    ];
+    
+    let currentIndex = 0;
+    let isResting = false;
+    let restTime = 0;
+    let intervalId = null;
+    
+    const timerDisplay = document.getElementById('timerDisplay');
+    const currentExerciseEl = document.getElementById('currentExercise');
+    const currentRepsEl = document.getElementById('currentReps');
+    const timerEl = document.getElementById('timer');
+    const statusEl = document.getElementById('status');
+    const progressEl = document.getElementById('progress');
+    const startBtn = document.getElementById('startBtn');
+    const doneBtn = document.getElementById('doneBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    const exerciseList = document.getElementById('exerciseList');
+    const completeScreen = document.getElementById('completeScreen');
+    
+    function updateProgress() {
+      const percent = (currentIndex / exercises.length) * 100;
+      progressEl.style.width = percent + '%';
+    }
+    
+    function updateExerciseList() {
+      const items = exerciseList.querySelectorAll('.exercise-item');
+      items.forEach((item, i) => {
+        item.classList.remove('active', 'done');
+        if (i < currentIndex) item.classList.add('done');
+        if (i === currentIndex && !isResting) item.classList.add('active');
+      });
+    }
+    
+    function showExercise() {
+      const exercise = exercises[currentIndex];
+      currentExerciseEl.textContent = exercise.name;
+      currentRepsEl.textContent = exercise.reps;
+      timerEl.textContent = 'GO!';
+      timerEl.classList.remove('rest');
+      statusEl.textContent = `Round ${exercise.round} of 2 • Exercise ${(currentIndex % 5) + 1} of 5`;
+      
+      doneBtn.style.display = 'block';
+      skipBtn.style.display = 'none';
+      updateExerciseList();
+    }
+    
+    function startRest(duration, message) {
+      isResting = true;
+      restTime = duration;
+      currentExerciseEl.textContent = message;
+      currentRepsEl.textContent = '';
+      timerEl.textContent = restTime;
+      timerEl.classList.add('rest');
+      
+      doneBtn.style.display = 'none';
+      skipBtn.style.display = 'block';
+      
+      intervalId = setInterval(() => {
+        restTime--;
+        timerEl.textContent = restTime;
+        
+        if (restTime <= 0) {
+          clearInterval(intervalId);
+          isResting = false;
+          
+          if (currentIndex >= exercises.length) {
+            finishWorkout();
+          } else {
+            showExercise();
+          }
+        }
+      }, 1000);
+    }
+    
+    function nextExercise() {
+      currentIndex++;
+      updateProgress();
+      updateExerciseList();
+      
+      if (currentIndex >= exercises.length) {
+        finishWorkout();
+        return;
+      }
+      
+      // Check if we're moving to round 2 (after exercise 5)
+      if (currentIndex === 5) {
+        startRest(60, '🔄 Round Break');
+      } else {
+        startRest(15, '😤 Rest');
+      }
+    }
+    
+    function finishWorkout() {
+      timerDisplay.classList.remove('show');
+      exerciseList.style.display = 'none';
+      doneBtn.style.display = 'none';
+      skipBtn.style.display = 'none';
+      completeScreen.classList.add('show');
+      progressEl.style.width = '100%';
+      startConfetti();
+    }
+    
+    function skipRest() {
+      if (intervalId) clearInterval(intervalId);
+      isResting = false;
+      
+      if (currentIndex >= exercises.length) {
+        finishWorkout();
+      } else {
+        showExercise();
+      }
+    }
+    
+    startBtn.addEventListener('click', () => {
+      startBtn.style.display = 'none';
+      timerDisplay.classList.add('show');
+      showExercise();
+    });
+    
+    doneBtn.addEventListener('click', nextExercise);
+    skipBtn.addEventListener('click', skipRest);
+    
+    // Confetti
+    function startConfetti() {
+      const canvas = document.getElementById('confetti');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      
+      const pieces = [];
+      const colors = ['#ff6b6b', '#4ade80', '#00d9ff', '#fbbf24', '#a78bfa', '#f472b6'];
+      
+      for (let i = 0; i < 150; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          r: Math.random() * 6 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: Math.random() * 4 - 2,
+          vy: Math.random() * 3 + 2,
+          rotation: Math.random() * 360,
+          rotationSpeed: Math.random() * 10 - 5
+        });
+      }
+      
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        let active = false;
+        pieces.forEach(p => {
+          if (p.y < canvas.height + 20) {
+            active = true;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.rotation += p.rotationSpeed;
+            p.vy += 0.1;
+            
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation * Math.PI / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 1.5);
+            ctx.restore();
+          }
+        });
+        
+        if (active) requestAnimationFrame(animate);
+      }
+      
+      animate();
+    }
+  </script>
+</body>
+</html>
