@@ -221,18 +221,160 @@
       color: #4ade80;
       margin-bottom: 20px;
     }
-    
+
     .complete-screen p {
       font-size: 1.2rem;
       color: #888;
     }
+
+    /* Streak widget */
+    .streak-widget {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .streak-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 107, 107, 0.15);
+      border: 1px solid rgba(255, 107, 107, 0.3);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .streak-badge .flame { font-size: 1.1rem; }
+    .streak-count { color: #ff6b6b; }
+
+    .streak-progress {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 217, 255, 0.1);
+      border: 1px solid rgba(0, 217, 255, 0.25);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 0.85rem;
+      color: #00d9ff;
+    }
+
+    .streak-progress .dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .streak-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(0, 217, 255, 0.25);
+      transition: background 0.3s;
+    }
+
+    .streak-dot.filled { background: #00d9ff; }
+    .streak-dot.prize { background: #fbbf24; }
+
+    /* Prize modal */
+    .prize-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      display: none;
+    }
+
+    .prize-overlay.show { display: flex; }
+
+    .prize-modal {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      border: 2px solid #fbbf24;
+      border-radius: 20px;
+      padding: 40px 30px;
+      text-align: center;
+      max-width: 320px;
+      width: 90%;
+      box-shadow: 0 0 40px rgba(251, 191, 36, 0.3);
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    .prize-icon { font-size: 4rem; margin-bottom: 12px; }
+
+    .prize-modal h2 {
+      font-size: 1.6rem;
+      color: #fbbf24;
+      margin-bottom: 8px;
+    }
+
+    .prize-modal .prize-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .prize-modal .prize-desc {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 24px;
+    }
+
+    .prize-milestone {
+      display: inline-block;
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      border-radius: 12px;
+      padding: 4px 14px;
+      font-size: 0.8rem;
+      color: #fbbf24;
+      margin-bottom: 20px;
+    }
+
+    .btn-claim {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #000;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 30px;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.2s;
+    }
+
+    .btn-claim:hover { transform: scale(1.03); }
+    .btn-claim:active { transform: scale(0.97); }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>💪 General Fitness</h1>
     <p class="subtitle">~10 minutes • 2 rounds • 5 exercises each</p>
-    
+
+    <div class="streak-widget" id="streakWidget">
+      <div class="streak-badge">
+        <span class="flame">🔥</span>
+        <span class="streak-count" id="streakCount">0</span>
+        <span style="color:#888; font-weight:400">workouts</span>
+      </div>
+      <div class="streak-progress">
+        <div class="dots" id="streakDots"></div>
+        <span id="streakProgressLabel">0/5 to prize</span>
+      </div>
+    </div>
+
     <div class="timer-display" id="timerDisplay">
       <div class="current-exercise" id="currentExercise">Jumping Jacks</div>
       <div class="current-reps" id="currentReps">30 reps</div>
@@ -293,6 +435,7 @@
     <div class="complete-screen" id="completeScreen">
       <h2>🎉 Workout Complete!</h2>
       <p>Great job! You crushed it!</p>
+      <p id="completeStreakMsg" style="margin-top:12px; font-size:1rem; color:#fbbf24;"></p>
     </div>
     
     </div>
@@ -307,6 +450,18 @@
   </div>
   
   <canvas class="confetti" id="confetti"></canvas>
+
+  <!-- Prize Modal -->
+  <div class="prize-overlay" id="prizeOverlay">
+    <div class="prize-modal">
+      <div class="prize-icon" id="prizeIcon">🏅</div>
+      <div class="prize-milestone" id="prizeMilestone">5 Workouts!</div>
+      <h2>Prize Unlocked!</h2>
+      <div class="prize-title" id="prizeTitle">Rest Day Champion</div>
+      <div class="prize-desc" id="prizeDesc">You've earned an official rest day. Take it!</div>
+      <button class="btn-claim" id="claimBtn">Claim Prize 🎁</button>
+    </div>
+  </div>
   
   <script>
     const exercises = [
@@ -420,6 +575,26 @@
       completeScreen.classList.add('show');
       progressEl.style.width = '100%';
       startConfetti();
+
+      // Update streak
+      const data = getStreakData();
+      data.totalWorkouts = (data.totalWorkouts || 0) + 1;
+      saveStreakData(data);
+      updateStreakUI(data);
+
+      // Update completion message
+      const remaining = 5 - (data.totalWorkouts % 5);
+      const msgEl = document.getElementById('completeStreakMsg');
+      if (data.totalWorkouts % 5 === 0) {
+        msgEl.textContent = '🎁 Prize unlocked! Keep going for the next one!';
+      } else {
+        msgEl.textContent = `🔥 ${data.totalWorkouts} workout${data.totalWorkouts !== 1 ? 's' : ''} total • ${remaining} more to next prize`;
+      }
+
+      // Every 5 workouts earns a prize
+      if (data.totalWorkouts % 5 === 0) {
+        setTimeout(() => showPrize(data.totalWorkouts), 1800);
+      }
     }
     
     function skipRest() {
@@ -442,6 +617,78 @@
     doneBtn.addEventListener('click', nextExercise);
     skipBtn.addEventListener('click', skipRest);
     
+    // ── Streak System ────────────────────────────────────────────────────────
+
+    const STREAK_KEY = 'fitness_streak_data';
+
+    const PRIZES = [
+      { icon: '🏅', title: 'Rest Day Champion',  desc: "You've earned an official rest day. Take it!" },
+      { icon: '💪', title: 'Fitness Warrior',     desc: "Your dedication is truly unstoppable!" },
+      { icon: '🔥', title: 'On Fire',             desc: "You are absolutely crushing it!" },
+      { icon: '🏆', title: 'Legend Status',       desc: "You're in elite athlete territory!" },
+      { icon: '⭐', title: 'Streak Master',       desc: "Another milestone crushed! Keep going!" },
+    ];
+
+    function getStreakData() {
+      try {
+        const raw = localStorage.getItem(STREAK_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {
+        console.warn('Failed to parse streak data from localStorage:', e);
+      }
+      return { totalWorkouts: 0 };
+    }
+
+    function saveStreakData(data) {
+      try {
+        localStorage.setItem(STREAK_KEY, JSON.stringify(data));
+      } catch (e) {}
+    }
+
+    function updateStreakUI(data) {
+      const total = data.totalWorkouts;
+      const intoBlock = total % 5;          // 0–4 within current 5-block
+
+      document.getElementById('streakCount').textContent = total;
+
+      // Build 5 dots showing progress toward next prize
+      const dotsEl = document.getElementById('streakDots');
+      dotsEl.innerHTML = '';
+      const justEarned = intoBlock === 0 && total > 0;
+      for (let i = 0; i < 5; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'streak-dot' + (justEarned || i < intoBlock ? ' filled' : '');
+        if (justEarned) dot.classList.add('prize');
+        dotsEl.appendChild(dot);
+      }
+
+      document.getElementById('streakProgressLabel').textContent =
+        justEarned
+          ? '🎁 Prize just earned!'
+          : `${intoBlock}/5 to prize`;
+    }
+
+    function showPrize(totalWorkouts) {
+      const prizeIndex = Math.floor(totalWorkouts / 5) - 1;
+      const prize = PRIZES[Math.min(prizeIndex, PRIZES.length - 1)];
+
+      document.getElementById('prizeIcon').textContent    = prize.icon;
+      document.getElementById('prizeTitle').textContent   = prize.title;
+      document.getElementById('prizeDesc').textContent    = prize.desc;
+      document.getElementById('prizeMilestone').textContent = `${totalWorkouts} Workouts!`;
+
+      document.getElementById('prizeOverlay').classList.add('show');
+    }
+
+    document.getElementById('claimBtn').addEventListener('click', () => {
+      document.getElementById('prizeOverlay').classList.remove('show');
+    });
+
+    // Initialise UI on load
+    updateStreakUI(getStreakData());
+
+    // ── End Streak System ────────────────────────────────────────────────────
+
     // Confetti
     function startConfetti() {
       const canvas = document.getElementById('confetti');
