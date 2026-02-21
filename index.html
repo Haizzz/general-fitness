@@ -106,12 +106,6 @@
       line-height: 1.1;
     }
 
-    .current-reps {
-      font-size: 1.1rem;
-      color: #888;
-      margin-bottom: 15px;
-    }
-
     .timer {
       font-size: 2.5rem;
       font-weight: bold;
@@ -119,12 +113,6 @@
     }
     
     .timer.rest { color: #ff6b6b; }
-    
-    .status {
-      margin-top: 12px;
-      font-size: 0.9rem;
-      color: #888;
-    }
     
     .btn {
       width: 100%;
@@ -154,11 +142,6 @@
       background: rgba(255,255,255,0.1);
       color: #fff;
       margin-top: 10px;
-    }
-    
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
     }
     
     .button-container {
@@ -377,60 +360,10 @@
 
     <div class="timer-display" id="timerDisplay">
       <div class="current-exercise" id="currentExercise">Jumping Jacks</div>
-      <div class="current-reps" id="currentReps">30 reps</div>
-      <div class="timer" id="timer">GO!</div>
-      <div class="status" id="status">Round 1 of 2</div>
+      <div class="timer" id="timer">x30</div>
     </div>
     
-    <div id="exerciseList">
-      <div class="round-card">
-        <div class="round-title">Round 1</div>
-        <div class="exercise-item" data-round="1" data-index="0">
-          <span class="exercise-name">Jumping Jacks</span>
-          <span class="exercise-reps">30 reps</span>
-        </div>
-        <div class="exercise-item" data-round="1" data-index="1">
-          <span class="exercise-name">Arm Circles</span>
-          <span class="exercise-reps">40 reps</span>
-        </div>
-        <div class="exercise-item" data-round="1" data-index="2">
-          <span class="exercise-name">Squats</span>
-          <span class="exercise-reps">20 reps</span>
-        </div>
-        <div class="exercise-item" data-round="1" data-index="3">
-          <span class="exercise-name">High Knees</span>
-          <span class="exercise-reps">60 reps</span>
-        </div>
-        <div class="exercise-item" data-round="1" data-index="4">
-          <span class="exercise-name">Bicycle Crunches</span>
-          <span class="exercise-reps">20 reps</span>
-        </div>
-      </div>
-      
-      <div class="round-card">
-        <div class="round-title">Round 2</div>
-        <div class="exercise-item" data-round="2" data-index="0">
-          <span class="exercise-name">Jumping Jacks</span>
-          <span class="exercise-reps">30 reps</span>
-        </div>
-        <div class="exercise-item" data-round="2" data-index="1">
-          <span class="exercise-name">Arm Circles</span>
-          <span class="exercise-reps">40 reps</span>
-        </div>
-        <div class="exercise-item" data-round="2" data-index="2">
-          <span class="exercise-name">Squats</span>
-          <span class="exercise-reps">20 reps</span>
-        </div>
-        <div class="exercise-item" data-round="2" data-index="3">
-          <span class="exercise-name">High Knees</span>
-          <span class="exercise-reps">60 reps</span>
-        </div>
-        <div class="exercise-item" data-round="2" data-index="4">
-          <span class="exercise-name">Bicycle Crunches</span>
-          <span class="exercise-reps">20 reps</span>
-        </div>
-      </div>
-    </div>
+    <div id="exerciseList"></div>
     
     <div class="complete-screen" id="completeScreen">
       <h2>🎉 Workout Complete!</h2>
@@ -465,16 +398,16 @@
   
   <script>
     const exercises = [
-      { name: 'Jumping Jacks', reps: '30 reps', round: 1 },
-      { name: 'Arm Circles', reps: '40 reps', round: 1 },
-      { name: 'Squats', reps: '20 reps', round: 1 },
-      { name: 'High Knees', reps: '60 reps', round: 1 },
-      { name: 'Bicycle Crunches', reps: '20 reps', round: 1 },
-      { name: 'Jumping Jacks', reps: '30 reps', round: 2 },
-      { name: 'Arm Circles', reps: '40 reps', round: 2 },
-      { name: 'Squats', reps: '20 reps', round: 2 },
-      { name: 'High Knees', reps: '60 reps', round: 2 },
-      { name: 'Bicycle Crunches', reps: '20 reps', round: 2 },
+      { name: 'Jumping Jacks', reps: 30 },
+      { name: 'Arm Circles', reps: 40 },
+      { name: 'Squats', reps: 20 },
+      { name: 'High Knees', reps: 60 },
+      { name: 'Bicycle Crunches', reps: 20 },
+      { name: 'Jumping Jacks', reps: 30 },
+      { name: 'Arm Circles', reps: 40 },
+      { name: 'Squats', reps: 20 },
+      { name: 'High Knees', reps: 60 },
+      { name: 'Bicycle Crunches', reps: 20 },
     ];
     
     let currentIndex = 0;
@@ -484,16 +417,30 @@
     
     const timerDisplay = document.getElementById('timerDisplay');
     const currentExerciseEl = document.getElementById('currentExercise');
-    const currentRepsEl = document.getElementById('currentReps');
     const timerEl = document.getElementById('timer');
-    const statusEl = document.getElementById('status');
     const progressEl = document.getElementById('progress');
     const startBtn = document.getElementById('startBtn');
     const doneBtn = document.getElementById('doneBtn');
     const skipBtn = document.getElementById('skipBtn');
     const exerciseList = document.getElementById('exerciseList');
     const completeScreen = document.getElementById('completeScreen');
-    
+
+    // Build exercise list from data
+    const EXERCISES_PER_ROUND = 5;
+    for (let r = 0; r < exercises.length / EXERCISES_PER_ROUND; r++) {
+      const card = document.createElement('div');
+      card.className = 'round-card';
+      card.innerHTML = `<div class="round-title">Round ${r + 1}</div>`;
+      for (let i = 0; i < EXERCISES_PER_ROUND; i++) {
+        const ex = exercises[r * EXERCISES_PER_ROUND + i];
+        const item = document.createElement('div');
+        item.className = 'exercise-item';
+        item.innerHTML = `<span class="exercise-name">${ex.name}</span><span class="exercise-reps">${ex.reps} reps</span>`;
+        card.appendChild(item);
+      }
+      exerciseList.appendChild(card);
+    }
+
     function updateProgress() {
       const percent = (currentIndex / exercises.length) * 100;
       progressEl.style.width = percent + '%';
@@ -511,10 +458,8 @@
     function showExercise() {
       const exercise = exercises[currentIndex];
       currentExerciseEl.textContent = exercise.name;
-      currentRepsEl.textContent = exercise.reps;
-      timerEl.textContent = 'GO!';
+      timerEl.textContent = 'x' + exercise.reps;
       timerEl.classList.remove('rest');
-      statusEl.textContent = `Round ${exercise.round} of 2 • Exercise ${(currentIndex % 5) + 1} of 5`;
       
       doneBtn.style.display = 'block';
       skipBtn.style.display = 'none';
@@ -525,7 +470,6 @@
       isResting = true;
       restTime = duration;
       currentExerciseEl.textContent = message;
-      currentRepsEl.textContent = '';
       timerEl.textContent = restTime;
       timerEl.classList.add('rest');
       
@@ -578,7 +522,7 @@
 
       // Update streak
       const data = getStreakData();
-      data.totalWorkouts = (data.totalWorkouts || 0) + 1;
+      data.totalWorkouts += 1;
       saveStreakData(data);
       updateStreakUI(data);
 
