@@ -377,9 +377,9 @@
 
     <div class="timer-display" id="timerDisplay">
       <div class="current-exercise" id="currentExercise">Jumping Jacks</div>
-      <div class="current-reps" id="currentReps">30 reps</div>
-      <div class="timer" id="timer">GO!</div>
-      <div class="status" id="status">Round 1 of 2</div>
+      <div class="current-reps" id="currentReps"></div>
+      <div class="timer" id="timer">x30</div>
+      <div class="status" id="status"></div>
     </div>
     
     <div id="exerciseList">
@@ -511,10 +511,11 @@
     function showExercise() {
       const exercise = exercises[currentIndex];
       currentExerciseEl.textContent = exercise.name;
-      currentRepsEl.textContent = exercise.reps;
-      timerEl.textContent = 'GO!';
+      currentRepsEl.textContent = '';
+      const repNumber = exercise.reps.replace(/[^0-9]/g, '');
+      timerEl.textContent = 'x' + repNumber;
       timerEl.classList.remove('rest');
-      statusEl.textContent = `Round ${exercise.round} of 2 • Exercise ${(currentIndex % 5) + 1} of 5`;
+      statusEl.textContent = '';
       
       doneBtn.style.display = 'block';
       skipBtn.style.display = 'none';
