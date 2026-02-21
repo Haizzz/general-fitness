@@ -106,12 +106,6 @@
       line-height: 1.1;
     }
 
-    .current-reps {
-      font-size: 1.1rem;
-      color: #888;
-      margin-bottom: 15px;
-    }
-
     .timer {
       font-size: 2.5rem;
       font-weight: bold;
@@ -119,12 +113,6 @@
     }
     
     .timer.rest { color: #ff6b6b; }
-    
-    .status {
-      margin-top: 12px;
-      font-size: 0.9rem;
-      color: #888;
-    }
     
     .btn {
       width: 100%;
@@ -377,9 +365,7 @@
 
     <div class="timer-display" id="timerDisplay">
       <div class="current-exercise" id="currentExercise">Jumping Jacks</div>
-      <div class="current-reps" id="currentReps"></div>
       <div class="timer" id="timer">x30</div>
-      <div class="status" id="status"></div>
     </div>
     
     <div id="exerciseList">
@@ -465,16 +451,16 @@
   
   <script>
     const exercises = [
-      { name: 'Jumping Jacks', reps: '30 reps', round: 1 },
-      { name: 'Arm Circles', reps: '40 reps', round: 1 },
-      { name: 'Squats', reps: '20 reps', round: 1 },
-      { name: 'High Knees', reps: '60 reps', round: 1 },
-      { name: 'Bicycle Crunches', reps: '20 reps', round: 1 },
-      { name: 'Jumping Jacks', reps: '30 reps', round: 2 },
-      { name: 'Arm Circles', reps: '40 reps', round: 2 },
-      { name: 'Squats', reps: '20 reps', round: 2 },
-      { name: 'High Knees', reps: '60 reps', round: 2 },
-      { name: 'Bicycle Crunches', reps: '20 reps', round: 2 },
+      { name: 'Jumping Jacks', reps: 30, round: 1 },
+      { name: 'Arm Circles', reps: 40, round: 1 },
+      { name: 'Squats', reps: 20, round: 1 },
+      { name: 'High Knees', reps: 60, round: 1 },
+      { name: 'Bicycle Crunches', reps: 20, round: 1 },
+      { name: 'Jumping Jacks', reps: 30, round: 2 },
+      { name: 'Arm Circles', reps: 40, round: 2 },
+      { name: 'Squats', reps: 20, round: 2 },
+      { name: 'High Knees', reps: 60, round: 2 },
+      { name: 'Bicycle Crunches', reps: 20, round: 2 },
     ];
     
     let currentIndex = 0;
@@ -484,9 +470,7 @@
     
     const timerDisplay = document.getElementById('timerDisplay');
     const currentExerciseEl = document.getElementById('currentExercise');
-    const currentRepsEl = document.getElementById('currentReps');
     const timerEl = document.getElementById('timer');
-    const statusEl = document.getElementById('status');
     const progressEl = document.getElementById('progress');
     const startBtn = document.getElementById('startBtn');
     const doneBtn = document.getElementById('doneBtn');
@@ -511,11 +495,8 @@
     function showExercise() {
       const exercise = exercises[currentIndex];
       currentExerciseEl.textContent = exercise.name;
-      currentRepsEl.textContent = '';
-      const repNumber = exercise.reps.replace(/[^0-9]/g, '');
-      timerEl.textContent = 'x' + repNumber;
+      timerEl.textContent = 'x' + exercise.reps;
       timerEl.classList.remove('rest');
-      statusEl.textContent = '';
       
       doneBtn.style.display = 'block';
       skipBtn.style.display = 'none';
@@ -526,7 +507,6 @@
       isResting = true;
       restTime = duration;
       currentExerciseEl.textContent = message;
-      currentRepsEl.textContent = '';
       timerEl.textContent = restTime;
       timerEl.classList.add('rest');
       
