@@ -282,7 +282,6 @@
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.75);
-      display: flex;
       align-items: center;
       justify-content: center;
       z-index: 2000;
@@ -632,7 +631,9 @@
       try {
         const raw = localStorage.getItem(STREAK_KEY);
         if (raw) return JSON.parse(raw);
-      } catch (e) {}
+      } catch (e) {
+        console.warn('Failed to parse streak data from localStorage:', e);
+      }
       return { totalWorkouts: 0 };
     }
 
@@ -651,15 +652,16 @@
       // Build 5 dots showing progress toward next prize
       const dotsEl = document.getElementById('streakDots');
       dotsEl.innerHTML = '';
+      const justEarned = intoBlock === 0 && total > 0;
       for (let i = 0; i < 5; i++) {
         const dot = document.createElement('div');
-        dot.className = 'streak-dot' + (i < intoBlock ? ' filled' : '');
+        dot.className = 'streak-dot' + (justEarned || i < intoBlock ? ' filled' : '');
+        if (justEarned) dot.classList.add('prize');
         dotsEl.appendChild(dot);
       }
 
-      const remaining = 5 - intoBlock;
       document.getElementById('streakProgressLabel').textContent =
-        intoBlock === 0 && total > 0
+        justEarned
           ? '🎁 Prize just earned!'
           : `${intoBlock}/5 to prize`;
     }
